@@ -100,7 +100,7 @@ const app = createApp({
         handleElementScroll() {
             this.scrollPosition = window.scrollY;
             if (this.state.url == null) return;
-            if (window.innerHeight + this.scrollPosition >= document.body.offsetHeight && this.state.pageState != pageState.NEWLOAD && this.state.pageState != pageState.LOADEDSEARCH && this.state.pageState != pageState.LOADING) {
+            if (window.innerHeight + this.scrollPosition >= document.body.offsetHeight && this.state.pageState != pageState.NEWLOAD && this.state.pageState != pageState.LOADEDSEARCH && this.state.pageState != pageState.LOADING && this.state.pageState != pageState.SEARCHING) {
                 this.state.pageState = pageState.NEWLOAD;
                 setTimeout(() => {
                     this.fetchAllPokemon();
@@ -137,7 +137,7 @@ const app = createApp({
             if (this.state.pageState != pageState.LOADING)
             {
                 this.loadImageIndex = 0;
-                const value = await document.getElementById("search-input").value;
+                const value = await document.getElementById("search-input").value.toLowerCase();
                 this.state.pageState = pageState.SEARCHING;
                 if (value.length < 1){
                     this.pokemons = [];

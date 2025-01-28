@@ -1,0 +1,136 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    overflow-x: hidden;
+}
+
+main {
+    max-width: 600px;
+}
+
+.pokeball-icon {
+    width: 2rem;
+}
+
+.navigation {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    height: fit-content;
+}
+
+.navigation > span {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: 10px;
+}
+
+.prev, .next, .home {
+    background-color: red;
+    color: white;
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border: none;
+    border-radius: 3px;
+    font-weight: 600;
+    box-shadow: 0px 0px 5px -5px gray;
+}
+
+.main-content {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+
+.prev:hover, .next:hover, .home:hover {
+    cursor: pointer;
+}
+
+.pokemon-img {
+    display: grid;
+}
+
+.sprite-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 49% 49%;
+    gap: 1.5%;
+}
+
+.sprite-container > img {
+    width: 100%;
+}
+
+.stat-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 50% 50%;
+
+}
+
+.stat-container > div {
+    display: grid;
+    grid-template-columns: 50% 70%;
+    gap: 10px;
+    color: rgb(52, 51, 51);
+    height: fit-content;
+    align-items: center;
+}
+
+.table-move {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+td {
+    text-align: center;
+    border: 1px solid rgb(51, 50, 50);
+}
+
+th {
+    background-color: rgba(225, 25, 25, 0.905);
+    color: white;
+    padding: 5px;
+}
+
+.pokemon-section-4 {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.item-img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.held-item {
+    width: 100px;
+    text-align: center;
+}
+
+.item-img {
+    background-color: rgba(92, 92, 92, 0.28);
+    border-radius: 8px;
+}
+
+@media only screen and (max-width: 800px)
+{
+    .stat-container {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        display: grid;
+        grid-template-columns: 100%;
+        row-gap: 20px;
+    }
+
+}

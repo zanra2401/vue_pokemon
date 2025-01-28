@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/header.css">
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+   
+    <header id="header">
+        <img src="assets/pokeballLogo.png" alt="logo" class="logo">
+    </header>
+    
+    <main id="index">
+        <div class="filter">
+            <div class="search-container">
+                <input type="text" class="search" name="" @input="search()" id="search-input" id="" placeholder="Search Pokemon Name" spellcheck="false">
+                <img src="./assets/search.png" alt="search" class="search-icon">
+            </div>
+
+            <div class="filter-tag">
+                <strong class="filter-name">Type</strong>
+                <div class="filter-list">
+                    <button class="filter-tags-type active" @click="changeTypeFilter('all')" >all</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('fire')" >fire</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('normal')">normal</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('water')">water</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('electric')">electric</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('grass')">grass</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('ice')">ice</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('fighting')">fighting</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('poison')">poison</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('ground')">ground</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('flying')">flying</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('psychic')">psychic</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('bug')">bug</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('rock')">rock</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('ghost')">ghost</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('dragon')">dragon</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('dark')">dark</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('steel')">steel</button>
+                    <button class="filter-tags-type" @click="changeTypeFilter('fairy')">fairy</button>
+                </div>
+
+                <strong class="filter-name">Game</strong>
+                <div class="filter-list">
+                    <button class="filter-tags-games active" @click="changeTypeGame('all')">all</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('red')">red</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('blue')">blue</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('yellow')">yellow</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('gold')">gold</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('silver')">silver</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('crystal')">crystal</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('ruby')">ruby</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('sapphire')">sapphire</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('emerald')">emerald</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('firered')">firered</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('leafgreen')">leafgreen</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('diamond')">diamond</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('pearl')">pearl</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('platinum')">platinum</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('heartgold')">heartgold</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('soulsilver')">soulsilver</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('black')">black</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('white')">white</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('black-2')">black-2</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('white-2')">white-2</button>
+                    <button class="filter-tags-games" @click="changeTypeGame('omega-ruby')">omega-ruby</button>
+                </div>
+            </div>
+        </div>
+        <div v-if="state.pageState == 'loading'" class="loading">
+            <img src="./assets/loading.gif" alt="loading">
+        </div>
+        <div v-else-if="(state.pageState == 'loadedsearch' || state.pageState == 'loaded') && pokemons.length < 1" class="loading">
+            <img src="./assets/empty.gif" alt="loading">
+        </div>
+        <div v-else>
+            <div ref="pokemonContainer"  class="pokemon-container">
+                <a v-for="pokemon in pokemons" class="card" :href="'pages/pokemonDetail.html?id=' + pokemon.id">
+                    <div class="image" :id="'pokemon' + pokemon.id">
+                        <img  src="./assets/loading.gif" :alt="pokemons.name" class="pokemon-loading">
+                    </div>
+                    <strong class="pokemon-name">{{ pokemon.name.toUpperCase() }}</strong>
+                    <div class="types">
+                        <div 
+                            v-for="type in pokemon.types" 
+                            :style="{ backgroundColor: typeColors[type.type.name], color: 'white'}">
+                            {{ type.type.name }}
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div v-if="state.pageState == 'newloading'" style="width: 100%; display: flex; justify-content: center;">
+                <img src="./assets/loading.gif" alt="loading">
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="js/index.js"></script>
+</body>
+</html>

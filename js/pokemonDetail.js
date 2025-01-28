@@ -119,16 +119,16 @@ const app = createApp({
 
         next()
         {
-            window.location.href = `/pages/pokemonDetail.html?id=${parseInt(this.id) + 1}`;
+            window.location.href = `/vue_pokemon/pages/pokemonDetail.html?id=${parseInt(this.id) + 1}`;
         },
 
         prev()
         {
-            window.location.href = `/pages/pokemonDetail.html?id=${parseInt(this.id) - 1}`;
+            window.location.href = `/vue_pokemon/pages/pokemonDetail.html?id=${parseInt(this.id) - 1}`;
         },
         home()
         {
-            window.location.href = `/index.html`;
+            window.location.href = `/vue_pokemon/index.html`;
         }
     },
     mounted() 

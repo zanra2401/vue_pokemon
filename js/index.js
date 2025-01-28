@@ -100,7 +100,7 @@ const app = createApp({
         handleElementScroll() {
             this.scrollPosition = window.scrollY;
             if (this.state.url == null) return;
-            if (window.innerHeight + this.scrollPosition >= document.body.offsetHeight && this.state.pageState != pageState.NEWLOAD && this.state.pageState != pageState.LOADEDSEARCH) {
+            if (window.innerHeight + this.scrollPosition >= document.body.offsetHeight && this.state.pageState != pageState.NEWLOAD && this.state.pageState != pageState.LOADEDSEARCH && this.state.pageState != pageState.LOADING) {
                 this.state.pageState = pageState.NEWLOAD;
                 setTimeout(() => {
                     this.fetchAllPokemon();
@@ -174,7 +174,6 @@ const app = createApp({
         },
         changeTypeFilter(filter)
         {
-            this.state.pageState = pageState.LOADING;
             this.state.filter.type = filter;
             this.loadImageIndex = 0;
             this.state.url = `https://pokeapi.co/api/v2/pokemon/`;
@@ -194,7 +193,6 @@ const app = createApp({
         },
         changeTypeGame(filter)
         {  
-            this.state.pageState = pageState.LOADING;
             this.state.filter.game = filter;
             this.loadImageIndex = 0;
             this.state.url = `https://pokeapi.co/api/v2/pokemon/`;

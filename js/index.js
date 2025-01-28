@@ -174,6 +174,7 @@ const app = createApp({
         },
         changeTypeFilter(filter)
         {
+            this.state.pageState = pageState.LOADING;
             this.state.filter.type = filter;
             this.loadImageIndex = 0;
             this.state.url = `https://pokeapi.co/api/v2/pokemon/`;
@@ -193,6 +194,7 @@ const app = createApp({
         },
         changeTypeGame(filter)
         {  
+            this.state.pageState = pageState.LOADING;
             this.state.filter.game = filter;
             this.loadImageIndex = 0;
             this.state.url = `https://pokeapi.co/api/v2/pokemon/`;

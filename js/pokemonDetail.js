@@ -1,4 +1,4 @@
-import { createApp, ref, useTemplateRef, onMounted, onUnmounted } from "../node_modules/vue/dist/vue.esm-browser.js";
+import { createApp, ref, useTemplateRef, onMounted, onUnmounted } from "https://unpkg.com/vue@3.5.13/dist/vue.esm-browser.js";
 import { typeColors } from "./global.js";
 
 const pageState = {

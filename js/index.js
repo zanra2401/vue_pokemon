@@ -1,4 +1,4 @@
-import { createApp, ref, onMounted, onUnmounted, useTemplateRef } from "../node_modules/vue/dist/vue.esm-browser.js";
+import { createApp, ref, onMounted, onUnmounted, useTemplateRef } from "https://unpkg.com/vue@3.5.13/dist/vue.esm-browser.js";
 import { typeColors } from "./global.js";
 
 const pageState = {
@@ -19,9 +19,6 @@ const state = ref({
         game: 'all'
     }
 });
-
-
-
 
 const app = createApp({
     data() {

@@ -1,54 +1,12 @@
 body {
     padding: 0px;
     margin: 0px;
-    overflow-x:hidden ;
+    overflow-x:hidden;
     overflow-y: scroll;
 }
 
 .filter {
     margin-bottom: 40px;
-}
-
-
-
-
-.image {
-    width: 100%;
-    background-color: rgba(162, 137, 221, 0.164);
-    border-radius: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    aspect-ratio: 1/1;
-}
-
-.image > .img {
-    width: 100%;
-    transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.5s;
-}
-
-.card {
-    text-decoration: none;
-}
-
-.card:hover .img {
-    transform: rotate(15deg);
-    scale: 1.2;
-
-}
-
-.pokemon-container {
-    display: grid;
-    grid-template-columns: 49% 49%;
-    column-gap: 1.5%;
-    justify-content: space-between;
-    row-gap: 30px;
-    margin-bottom: 40px;
-}
-
-.pokemon-loading {
-    margin: auto;
-    width: 64px;
 }
 
 .search {
@@ -98,7 +56,7 @@ body {
 }
 
 .search-container:focus-within {
-border-color: #007BFF; /* Highlight border color */
+    border-color: #007BFF; 
 }  
 
 
@@ -125,75 +83,3 @@ border-color: #007BFF; /* Highlight border color */
     column-gap: 5px;
 }
 
-
-@media only screen and (min-width: 720px) and (max-width: 872px) {
-    .pokemon-container {
-        display: grid;
-        grid-template-columns: 24% 24% 24% 24%;
-        column-gap: 1.333%;
-        box-sizing: border-box;
-    }
-
-    .filter-tag {
-        margin-top: 20px;
-        row-gap: 20px;
-        display: grid;
-        grid-template-columns: 10% 90%;
-    }
-
-
-    .filter-list {
-        display: flex;
-        flex-wrap: wrap;
-        row-gap: 10px;
-        column-gap: 5px;
-    }
-}
-
-@media only screen and (min-width: 872px) {
-    .pokemon-container {
-        display: grid;
-        width: 100%;
-        grid-template-columns: 19% 19% 19% 19% 19%;
-        column-gap: 1.2%;
-    }
-    
-    .filter-tag {
-        margin-top: 20px;
-        row-gap: 20px;
-        display: grid;
-        grid-template-columns: 10% 90%;
-    }
-
-
-
-    .filter-list {
-        display: flex;
-        flex-wrap: wrap;
-        row-gap: 10px;
-        column-gap: 5px;
-    }
-}
-
-@media  only screen and (min-width: 550px) and (max-width: 720px) {
-    .pokemon-container {
-        display: grid;
-        width: 100%;
-        grid-template-columns: 33.333% 33.333% 33.333%;
-        column-gap: 1.2%;
-    }
-    
-    .filter-tag {
-        margin-top: 20px;
-        row-gap: 20px;
-        display: grid;
-        grid-template-columns: 20% 80%;
-    }
-
-    .filter-list {
-        display: flex;
-        flex-wrap: wrap;
-        row-gap: 10px;
-        column-gap: 5px;
-    }
-}

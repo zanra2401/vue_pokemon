@@ -13,12 +13,12 @@
     </header>
 
     <main id="pokemon-detail">
+        
         <div class="navigation">
             <span>
                 <img class="pokeball-icon" src="../assets/pokeballLogo.png" alt="">
                 <strong> {{ "#" + id }} </strong>
             </span>
-
             <span>
                 <button @click="home()" class="home">
                     home
@@ -35,117 +35,42 @@
         <div v-if="state.pageState == 'loading'" class="loading">
             <img src="../assets/loading.gif" alt="loading">
         </div>
-        <div v-else class="main-content">
-            <h1>{{ pokemon.name }}</h1>
-            <div class="pokemon-section-1">
-                <div id="pokemon-img" class="pokemon-img">
-
-                    <h3 v-if="pokemon.male_sprites.length > 0">Default</h3>
-                    <span v-if="pokemon.male_sprites.length > 0" class="sprite-container">
-                        <img alt="pokemon.png" v-if="pokemon.male_sprites[1]" :src="pokemon.male_sprites[1]" alt="">
-                        <img alt="pokemon.png" v-if="pokemon.male_sprites[0]" :src="pokemon.male_sprites[0]" alt="">
-                    </span>
-
-                    <h3 v-if="pokemon.female_sprites.length > 0">Female</h3>
-                    <span v-if="pokemon.female_sprites.length > 0" class="sprite-container">
-                        <img alt="pokemon.png" v-if="pokemon.male_sprites[1]" :src="pokemon.female_sprites[1]" alt="">
-                        <img alt="pokemon.png" v-if="pokemon.male_sprites[0]" :src="pokemon.female_sprites[0]" alt="">
-                    </span>
-
-                    <h3 v-if="pokemon.shiny_male_sprites.length > 0">Shiny Male</h3>
-                    <span v-if="pokemon.shiny_male_sprites.length > 0" class="sprite-container">
-                        <img alt="pokemon.png" v-if="pokemon.male_sprites[1]" :src="pokemon.shiny_male_sprites[1]" alt="">
-                        <img alt="pokemon.png" v-if="pokemon.male_sprites[0]" :src="pokemon.shiny_male_sprites[0]" alt="">
-                    </span>
-
-                    <h3 v-if="pokemon.shiny_female_sprites.length > 0">Shiny Female</h3>
-                    <span v-if="pokemon.shiny_female_sprites.length > 0" class="sprite-container">
-                        <img alt="pokemon.png" v-if="pokemon.male_sprites[1]" :src="pokemon.shiny_female_sprites[1]" alt="">
-                        <img alt="pokemon.png" v-if="pokemon.male_sprites[0]" :src="pokemon.shiny_female_sprites[0]" alt="">
-                    </span>
+        <div v-else>
+            <div class="main-info">
+                <div id="main-image-container">
+                    <img ref="mainImage" id="main-image" src="../assets/loading.gif" alt="pokemon">
                 </div>
-
-                <div class="pokemon-section-2">
-                    <div class="types">
-                        <div 
-                            v-for="type in pokemon.types" 
-                            :style="{ backgroundColor: typeColors[type.type.name], color: 'white'}">
-                            {{ type.type.name }}
+                <ul>
+                    <li id="pokemon-name">
+                        <span>
+                            {{ pokemonDetail.name.toUpperCase() }}
+                        </span>
+                        <div class="types">
+                            <div 
+                                v-for="type in pokemonDetail.types" 
+                                :style="{ backgroundColor: typeColors[type.type.name], color: 'white'}">
+                                {{ type.type.name }}
+                            </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="stat-container">
-                    <div class="stat">
+                    </li>
+                    <li v-for="stat in stats">
                         <strong>
-                            {{ pokemon.stats[0].stat.name + ":" }}
+                            {{stat.name}}
                         </strong>
-                        <strong>
-                            {{ pokemon.stats[0].base_stat }}
-                        </strong>
-
-                        <strong>
-                            {{ pokemon.stats[1].stat.name + ":" }}
-                        </strong>
-                        <strong>
-                            {{ pokemon.stats[1].base_stat }}
-                        </strong>
-
-                        <strong>
-                            {{ pokemon.stats[2].stat.name + ":" }}
-                        </strong>
-                        <strong>
-                            {{ pokemon.stats[2].base_stat }}
-                        </strong>
-
-                        <strong>
-                            {{ pokemon.stats[3].stat.name + ":" }}
-                        </strong>
-                        <strong>
-                            {{ pokemon.stats[3].base_stat }}
-                        </strong>
-
-                        <strong>
-                            {{ pokemon.stats[4].stat.name + ":" }}
-                        </strong>
-                        <strong>
-                            {{ pokemon.stats[4].base_stat }}
-                        </strong>
-
-                        <strong>
-                            {{ pokemon.stats[5].stat.name + ":" }}
-                        </strong>
-                        <strong>
-                            {{ pokemon.stats[5].base_stat }}
-                        </strong>
-                    </div>
-                    <div>
-                        <strong>
-                            weight: 
-                        </strong>
-                        <strong>
-                            {{ pokemon.weight / 10 }} kg
-                        </strong>
-
-                        <strong>
-                            height: 
-                        </strong>
-                        <strong>
-                            {{ pokemon.height / 10 }} m
-                        </strong>
-
-                        <strong style="column-span: 2;">
-                            <audio controls>
-                                <source :src="pokemon.cries.legacy">
-                                Your browser does not support the audio element.
-                            </audio>
-                        </strong>
-                    </div>
-                </div>
+                        <div class="stat-bars">
+                            <div class="fill-bar" :style="stat.style"></div>
+                            <strong class="number-stat">{{stat.base_stat}}</strong>
+                        </div>
+                    </li>
+                </ul>
             </div>
-
-            <div class="pokemon-section-3">
-                <table class="table-move">
+            
+           <div id="moves">
+                <h2>MOVES</h2>
+                <div v-if="!moveLoaded" class="loading">
+                    <img src="../assets/loading.gif" alt="loading">
+                </div>
+                <table v-else id="moves-table">
                     <tr>
                         <th>move</th>
                         <th>type</th>
@@ -153,47 +78,92 @@
                         <th>acc</th>
                         <th>pp</th>
                     </tr>
-    
-                    <tr v-for="move in pokemon.moves">
-                        <td>
-                            {{ move.name }}
-                        </td>
+                    <tr v-for="move in movesPokemon">
+                        <td>{{ move.name }}</td>
 
                         <td>
+                            <div class="types">
                                 <div 
                                     :style="{ backgroundColor: typeColors[move.type.name], color: 'white'}">
                                     {{ move.type.name }}
                                 </div>
+                            </div>
                         </td>
 
-                        <td>
+                        <td class="power">
                             {{ (move.power) ? move.power : "-" }}
                         </td>
 
-                        <td>
+                        <td class="acc">
                             {{ (move.accuracy) ? move.accuracy + "%" : "-" }}
                         </td>
 
-                        <td>
+                        <td class="pp">
                             {{ (move.pp) ? move.pp : "-" }}
                         </td>
                     </tr>
                 </table>
-            </div>
+           </div>
 
-            <h3  v-if="pokemon.held_items.length > 0"  style="column-span: 2;">Held Items</h3>
-            <div  v-if="pokemon.held_items.length > 0"  class="pokemon-section-4">
-                <div v-for="item in pokemon.held_items" class="held-item">
-                    <div class="item-img">
-                        <img :src="item.sprite" alt="">
-                    </div>
-                    <strong>
-                        {{ item.name }}
-                    </strong>
+           <div id="held-items">
+                <h2>HELD ITEMS</h2>
+                <div v-if="!itemsLoaded" class="loading">
+                    <img src="../assets/loading.gif" alt="loading">
                 </div>
-            </div>
-        </div>
+                <div v-else-if="heldItems.length < 1" class="items-empty">
+                    <h1 class="held-items-message">Does Not Have Held items</h1>
+                </div>
+                <table v-else>
+                    <tr>
+                        <th>Sprite</th>
+                        <th>Item</th>
+                        <th>Effect</th>
+                    </tr>
 
+                    <tr v-for="item in heldItems">
+                        <td>
+                            <img :src="item.sprites.default" alt="item" loading="lazy">
+                        </td>
+
+                        <td>
+                            {{ item.name }}
+                        </td>
+
+                        <td class="effect">
+                            {{ item.effect_entries[0].short_effect }}
+                        </td>
+                    </tr>
+
+                </table>
+           </div>
+
+           <div id="evolution">
+                <h2>EVOLUTION</h2>
+                <div v-if="!evolutionLoaded" class="loading">
+                    <img src="../assets/loading.gif" alt="loading">
+                </div>
+                <div v-else>
+                    <div ref="pokemonContainer"  class="pokemon-container">
+                        <a v-for="pokemon in evolution" class="card" :href="'/pages/pokemonDetail.html?id=' + pokemon.id">
+                            <strong class="id">{{ pokemon.id }}</strong>
+                            <div class="image" :id="'pokemon' + pokemon.id">
+                                <img  src="../assets/loading.gif" :alt="pokemon.name" class="pokemon-loading">
+                            </div>
+                            <strong class="pokemon-name">{{ pokemon.name.toUpperCase() }}</strong>
+                            <div class="types">
+                                <div 
+                                    v-for="type in pokemon.types" 
+                                    :style="{ backgroundColor: typeColors[type.type.name], color: 'white'}">
+                                    {{ type.type.name }}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+           </div>
+
+
+        </div>
     </main>
 
     <script type="module" src="../js/pokemonDetail.js"></script>

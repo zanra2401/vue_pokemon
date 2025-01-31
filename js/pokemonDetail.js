@@ -1,127 +1,163 @@
-import { createApp, ref, useTemplateRef, onMounted, onUnmounted } from "https://unpkg.com/vue@3.5.13/dist/vue.esm-browser.js";
+import { createApp, ref, useTemplateRef, onMounted, onUnmounted, watch, nextTick, computed } from "https://unpkg.com/vue@3.5.13/dist/vue.esm-browser.js";
 import { typeColors } from "./global.js";
+import { fetchHeldItems, fetchPokemonDetails, fetchPokemonMoves, getEvolutionChain } from "../service/api.js";
 
-const pageState = {
+const STATE = {
     LOADED : 'loaded',
     LOADING: 'loading',
     NEWLOAD: 'newloading'
+};
+
+const moveLoaded = ref(false);
+const itemsLoaded = ref(false);
+const evolutionLoaded = ref(false);
+
+const statColors = {
+    hp: "#4CAF50",           // Green
+    attack: "#F44336",       // Red
+    defense: "#2196F3",      // Blue
+    "special-attack": "#9C27B0",  // Purple
+    "special-defense": "#FFEB3B", // Yellow
+    speed: "#FF9800"         // Orange
 };
 
 const url = new URL(window.location.href);
 const params = new URLSearchParams(url.search);
 
 const state = ref({
-    pageState: pageState.LOADING,
+    pageState: STATE.LOADING,
 });
 
-const app = createApp({
+const pokemonDetail = ref({});
+const movesPokemon = ref({});
+const heldItems = ref({});
+const evolution = ref({});
+
+fetchPokemonDetails(params.get('id')).then((value) => {
+     if (value)
+     {
+        pokemonDetail.value = value;
+        state.value.pageState = STATE.LOADED;
+     }
+});
+
+
+async function loadImage(start) 
+{
+    for (let i = start; i < evolution.value.length; i++)
+    {
+        if (!evolution.value[i]) return;
+        const promise = new Promise((resolve, reject) => {
+            const pokemon = evolution.value[i];
+            const img = new Image();
+            img.src = pokemon.sprites.front_default;
+            img.classList.add('img');
+
+            img.onload = () => resolve({
+                id: 'pokemon' + pokemon.id,
+                img
+            });
+            img.onerror = () => reject(new Error("Error Load Image"));
+        });
+        
+        promise.then((pokemon) => {
+            const pokemonImg = document.getElementById(pokemon.id);
+            if (pokemonImg)
+            {
+                pokemonImg.innerHTML = "";
+                pokemonImg.appendChild(pokemon.img);
+            }
+        });
+    }
+}
+
+const stats = computed(() => {
+    const stats = [];
+    for (let stat of pokemonDetail.value.stats)
+    {
+        stats.push({
+            style: {
+                width: stat.base_stat / 255 * 100 + '%',
+                backgroundColor: statColors[stat.stat.name],
+            },
+            name: stat.stat.name,
+            base_stat: stat.base_stat
+        });
+    }
+
+    return stats;
+});
+
+const mainImage = createApp({
     data() {
         return {
-            state,
-            id: params.get('id'),
-            typeColors
-        };
+            pokemonDetail: pokemonDetail,
+        }
     },
+
     methods: {
-        fetchPokemon() {
-            try {
-                fetch(`https://pokeapi.co/api/v2/pokemon/${params.get('id')}/`).then(async (response) => {
-                    if (!response.ok || response.status >= 400) throw new Error("Fetching Error");
-                    const pokemonFetchResult = await response.json();
-                    let pokemon = {
-                        name: pokemonFetchResult.name,
-                        stats: pokemonFetchResult.stats,
-                        form: pokemonFetchResult.held_items,
-                        moves: [],
-                        cries: pokemonFetchResult.cries,
-                        types: pokemonFetchResult.types,
-                        height: pokemonFetchResult.height,
-                        weight: pokemonFetchResult.weight,
-                        id: pokemonFetchResult.id,
-                        male_sprites: [],
-                        female_sprites: [],
-                        shiny_male_sprites: [],
-                        shiny_female_sprites: [],
-                        held_items: []
-                    };
-    
-                    if (pokemonFetchResult.forms.length > 1)
-                    {
-                        pokemon.form = pokemonFetchResult.form;
-                    }
-    
-                    for (let keyMove in pokemonFetchResult.moves)
-                    {
-                        let move = {
-                            name: pokemonFetchResult.moves[keyMove].move.name,
-                        };
+        async loadImage() {
+            const img = document.createElement('img');
+            img.src = this.pokemonDetail.sprites.front_default;
+            img.onload = () => {
+                document.getElementById("main-image").src = img.src;
+            };
+        }
+    },
 
-                        await fetch(pokemonFetchResult.moves[keyMove].move.url).then(async response => {
-                            if (!response.ok || response.status >= 400) throw new Error("Error Fetching");
-                            const resultMoves = await response.json();
+    mounted() {
+        this.loadImage();
+    }
 
-                            move.accuracy = resultMoves.accuracy;
-                            move.power = resultMoves.power;
-                            move.pp = resultMoves.pp;
-                            move.priority = resultMoves.priority;
-                            move.stat_changes = resultMoves.stat_changes;
-                            move.target = resultMoves.target;
-                            move.type = resultMoves.type;
-                        });
+});
 
-                        pokemon.moves.push(move);
-                    }
 
-                    for (let sprite in pokemonFetchResult.sprites)
-                    {
-                        const male = new RegExp("^(front_|back_)default$", 'i');
-                        const female = new RegExp("^(front_|back_)female$", 'i');
-                        const shinyMale = new RegExp("^(front_shiny|back_shiny)$", 'i');
-                        const shinyFemale = new RegExp("^(front_shiny|back_shiny)_female$", 'i');
-                        
-                        if (male.test(sprite) && pokemonFetchResult.sprites[sprite] != null)
-                        {
-                            pokemon.male_sprites.push(pokemonFetchResult.sprites[sprite]);
-                        } else if (female.test(sprite) && pokemonFetchResult.sprites[sprite] != null) 
-                        {
-                            pokemon.female_sprites.push(pokemonFetchResult.sprites[sprite]);
-                        } else if (shinyMale.test(sprite) && pokemonFetchResult.sprites[sprite] != null)
-                        {
-                            pokemon.shiny_male_sprites.push(pokemonFetchResult.sprites[sprite]);
-                        } 
-                        else if (shinyFemale.test(sprite) && pokemonFetchResult.sprites[sprite] != null)
-                        {
-                            pokemon.shiny_female_sprites.push(pokemonFetchResult.sprites[sprite]);
-                        }
-                    }
+const main = createApp({
+    setup() {
 
-                    for(let item in pokemonFetchResult.held_items)
-                    {
-                        await fetch(pokemonFetchResult.held_items[item].item.url).then(async response => {
-                            if (!response.ok || response.status >= 400) throw new Error("Error Fetching");
-                            const result = await response.json();
-                            pokemon.held_items.push({
-                                name: result.name,
-                                sprite: result.sprites.default
-                            });
-                        });
-                    }
-                    
-                    this.pokemon = pokemon;
-                    this.state.pageState = pageState.LOADED;
-                });
-            } 
-            catch (err)
-            {
-                console.log("Error Occured: " + err.message);
-            }
-        },
+        watch(() => state.value.pageState, async (newValue, oldValue) => {
+            await nextTick();
+            fetchPokemonMoves(pokemonDetail.value.moves).then((value) => {
+                movesPokemon.value = value;
+                moveLoaded.value = true;
+            });
 
+            fetchHeldItems(pokemonDetail.value.held_items).then((value) => {
+                heldItems.value = value;
+                itemsLoaded.value = true;
+            });
+
+            getEvolutionChain(pokemonDetail.value.species.url).then(value => {
+                evolution.value = value;
+                evolutionLoaded.value = true;
+                loadImage(0);
+            }) ;
+
+
+            mainImage.mount("#main-image-container");
+        }, { once : true });
+
+        return {
+            state,
+            id: params.get("id"),
+            pokemonDetail,
+            stats,
+            typeColors,
+            moveLoaded,
+            movesPokemon,
+            itemsLoaded,
+            heldItems,
+            evolutionLoaded,
+            evolution
+        }
+    },
+
+    methods: {
         next()
         {
             window.location.href = `/vue_pokemon/pages/pokemonDetail.html?id=${parseInt(this.id) + 1}`;
         },
-
+    
         prev()
         {
             window.location.href = `/vue_pokemon/pages/pokemonDetail.html?id=${parseInt(this.id) - 1}`;
@@ -130,11 +166,9 @@ const app = createApp({
         {
             window.location.href = `/vue_pokemon/index.html`;
         }
-    },
-    mounted() 
-    {
-        this.fetchPokemon();
     }
 });
 
-app.mount("#pokemon-detail");
+
+main.mount("#pokemon-detail");
+

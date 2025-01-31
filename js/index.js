@@ -1,8 +1,9 @@
-import { createApp, ref, onMounted, onUnmounted, useTemplateRef } from "https://unpkg.com/vue@3.5.13/dist/vue.esm-browser.js";
+import { createApp, ref, onMounted, onUnmounted, useTemplateRef, watch } from "https://unpkg.com/vue@3.5.13/dist/vue.esm-browser.js";
 import { typeColors } from "./global.js";
+import { fetchPokemon } from "../service/api.js";
 
 const pageState = {
-    LOADED : 'loaded',
+    LOADED: 'loaded',
     LOADING: 'loading',
     NEWLOAD: 'newloading',
     LOADEDSEARCH: 'loadedsearch',
@@ -11,173 +12,131 @@ const pageState = {
 
 
 
-const state = ref({
-    pageState: pageState.LOADING,
-    url: "https://pokeapi.co/api/v2/pokemon/?limit=20",
-    filter: {
-        type: 'all',
-        game: 'all'
-    }
-});
-
 const app = createApp({
-    data() {
+    setup() {
+        const state = ref({
+            pageState: pageState.LOADING,
+            url: "https://pokeapi.co/api/v2/pokemon/?limit=20",
+            filter: {
+                type: 'all',
+                game: 'all'
+            },
+            display: 'default',
+        });
+        const displayPokemons = ref([]);
+        const fetchedPokemons = ref([]);
+        const scrollPosition = ref(0);
+        const loadImageIndex = ref(0);
+        const filterStart = ref(0);
+        const controller = ref(undefined);
+        const searchValue = ref("");
+
+        watch(() => [state.value.filter.type, state.value.filter.game], (newValue, oldValue) => {
+            if (newValue[0] == 'all' && newValue[1] == 'all') 
+            {
+                state.value.display = 'default';
+                filterStart.value = 0;
+            } else {
+                state.value.display = 'filter';
+            }
+        });
+
         return {
             state,
-            pokemons : [],
-            typeColors: typeColors,
-            scrollPosition: 0,
-            loadImageIndex: 0
-        }
+            displayPokemons,
+            filterStart,
+            fetchedPokemons,
+            typeColors,
+            scrollPosition,
+            loadImageIndex,
+            searchValue,
+        };
     },
+
     methods: {
-       async fetchAllPokemon(pokemonsTemp = []) {
-            try {
-                let result;
-                await fetch(this.state.url).then(async (response) => {
-                    if (!response.ok) throw new Error("Error: " + response.status);
-                    result = await response.json()
-                    for (let item in result.results)
-                    {
-                        await fetch(`${result.results[item].url}`).then(async (pokemonDetail) => {
-                            if (!pokemonDetail.ok) throw new Error("Error: " + pokemonDetail.status);
-                            let valid = true;
-                            let pokemon = await pokemonDetail.json();
-                            if (this.state.filter.type != 'all')
-                            {
-                                let typeValid = false;
-
-                                for (let type in pokemon.types)
-                                {
-                                    if (pokemon.types[type].type.name == this.state.filter.type)
-                                    {
-                                        typeValid = true;
-                                        break;
-                                    }
-                                }
-                                if (!typeValid) valid = false;
-                            }
-
-                            if (this.state.filter.game != 'all')
-                            {
-                                let gameValid = false;
-
-                                for (let game in pokemon.game_indices)
-                                {
-                                    if (pokemon.game_indices[game].version.name == this.state.filter.game)
-                                    {
-                                        gameValid = true;
-                                        break;
-                                    }
-                                }
-                                if (!gameValid) valid = false;
-                            }
-
-                            if (valid)
-                            {
-                                pokemonsTemp.push(pokemon);
-                            }
-                        });
-                    }
-           
-                });
-
-                if (pokemonsTemp.length >= 20 || result.next == null)
-                {
-                    this.state.pageState = pageState.LOADED;
-                    this.state.url = result.next;
-                    this.pokemons.push(...pokemonsTemp);
-                    this.loadImage();
-                } else {
-                    this.state.url = result.next;
-                    this.fetchAllPokemon(pokemonsTemp);
-                }
-            } catch(err) {
-                console.log("Error occured: " + err.message);
+        async updateDisplayPokemons()
+        {
+            if (this.controller) {
+                this.controller.abort();
             }
+            this.controller = new AbortController();
+            const signal = this.controller.signal;
+
+            const displayPokemonsLength = this.displayPokemons.length;
+            if (this.fetchedPokemons.length <= this.displayPokemons.length)
+            {
+                const result = await fetchPokemon(this.state.url, signal);
+                const pokemons = await Promise.all(result.results.map(async (element) => {
+                    const pokemon = await fetch(element.url, signal);
+                    const result = await pokemon.json();
+                    return result;
+                }));
+                this.fetchedPokemons.push(...pokemons);
+                this.displayPokemons.push(...pokemons);
+                this.state.url = result.next;
+            } else {     
+                if (this.fetchedPokemons.length - displayPokemonsLength >= 20)
+                {
+                    this.displayPokemons.push( ...this.fetchedPokemons.slice(displayPokemonsLength, displayPokemonsLength + 20));
+                } else {
+                    this.displayPokemons.push( ...this.fetchedPokemons.slice(displayPokemonsLength, this.fetchedPokemons.length));
+                }
+            }
+
+            this.loadImage(displayPokemonsLength);
+            this.state.pageState = pageState.LOADED;
         },
 
         handleElementScroll() {
             this.scrollPosition = window.scrollY;
-            if (this.state.url == null) return;
-            if (window.innerHeight + this.scrollPosition >= document.body.offsetHeight && this.state.pageState != pageState.NEWLOAD && this.state.pageState != pageState.LOADEDSEARCH && this.state.pageState != pageState.LOADING && this.state.pageState != pageState.SEARCHING) {
+            
+
+            if (window.innerHeight + this.scrollPosition >= document.body.offsetHeight - 200 && this.state.pageState != pageState.NEWLOAD && this.state.pageState != pageState.LOADEDSEARCH && this.state.pageState != pageState.LOADING && this.state.pageState != pageState.SEARCHING) {
                 this.state.pageState = pageState.NEWLOAD;
-                setTimeout(() => {
-                    this.fetchAllPokemon();
-                }, 500);
-                this.loadImageIndex += 20;
+                switch(this.state.display) {
+                    case 'filter':
+                        this.updateDisplayPokemonsFiltered();
+                        break;
+                    default:
+                        this.updateDisplayPokemons();
+                        break;
+                }
             }
         },
 
-        async loadImage() 
+        async loadImage(start) 
         {
-            for (let i = this.loadImageIndex; i < this.pokemons.length; i++)
+            for (let i = start; i < this.displayPokemons.length; i++)
             {
+                if (!this.displayPokemons[i]) return;
                 const promise = new Promise((resolve, reject) => {
+                    const pokemon = this.displayPokemons[i];
                     const img = new Image();
-                    img.src = this.pokemons[i].sprites.front_default;
+                    img.src = pokemon.sprites.front_default;
                     img.classList.add('img');
 
                     img.onload = () => resolve({
-                        id: 'pokemon' + this.pokemons[i].id,
+                        id: 'pokemon' + pokemon.id,
                         img
                     });
                     img.onerror = () => reject(new Error("Error Load Image"));
                 });
-
+                
                 promise.then((pokemon) => {
-                    document.getElementById(pokemon.id).innerHTML = "";
-                    document.getElementById(pokemon.id).appendChild(pokemon.img);
+                    const pokemonImg = document.getElementById(pokemon.id);
+                    if (pokemonImg)
+                    {
+                        pokemonImg.innerHTML = "";
+                        pokemonImg.appendChild(pokemon.img);
+                    }
                 });
             }
         },
 
-        async search() 
-        {
-            if (this.state.pageState != pageState.LOADING)
-            {
-                this.loadImageIndex = 0;
-                const value = await document.getElementById("search-input").value.toLowerCase();
-                this.state.pageState = pageState.SEARCHING;
-                if (value.length < 1){
-                    this.pokemons = [];
-                    this.state.url = `https://pokeapi.co/api/v2/pokemon/`;
-                    this.state.pageState = pageState.LOADING;
-                    this.fetchAllPokemon();
-                }
-                else
-                {
-                    try {
-                        fetch(`https://pokeapi.co/api/v2/pokemon/${value}/`).then(async response => {
-                            this.pokemons = [];
-                            if (response.status == 404) {
-                                this.state.pageState = pageState.LOADED;
-                                throw new Error("Not Found");
-                            } 
-
-                            if (!response.ok) {
-                                this.state.pageState = pageState.LOADED;
-                                throw new Error("Failed to fetch");
-                            }
-                            const pokemonSearch = await response.json();
-                            this.pokemons.push(pokemonSearch);
-                            this.state.pageState = pageState.LOADEDSEARCH;
-                            this.loadImage();
-                        }).catch(err => {
-                            console.log("Error Occured: " + err.message);
-                        });
-                    } catch (err) {
-                        console.log('Error Occured: ' + err.message);
-                    }
-                } 
-            }
-        },
         changeTypeFilter(filter)
         {
             this.state.filter.type = filter;
-            this.loadImageIndex = 0;
-            this.state.url = `https://pokeapi.co/api/v2/pokemon/`;
-            this.pokemons = [];
+            this.displayPokemons.splice(0, this.displayPokemons.length);
             Array.from(document.getElementsByClassName("filter-tags-type")).forEach(element => {
                 if (element.innerText == filter) 
                 {
@@ -186,17 +145,16 @@ const app = createApp({
                     element.classList.remove('active');
                 }
             });
-
-            
+            this.filterStart = 0;
             this.state.pageState = pageState.LOADING;
-            this.fetchAllPokemon(); 
+            if (this.state.filter.type == "all" && this.state.filter.game == "all") return this.updateDisplayPokemons();
+            this.updateDisplayPokemonsFiltered();
         },
+
         changeTypeGame(filter)
         {  
             this.state.filter.game = filter;
-            this.loadImageIndex = 0;
-            this.state.url = `https://pokeapi.co/api/v2/pokemon/`;
-            this.pokemons = [];
+            this.displayPokemons.splice(0, this.displayPokemons.length);
             Array.from(document.getElementsByClassName("filter-tags-games")).forEach(element => {
                 if (element.innerText == filter) 
                 {
@@ -205,19 +163,155 @@ const app = createApp({
                     element.classList.remove('active');
                 }
             });
-
-            
+            this.filterStart = 0;
             this.state.pageState = pageState.LOADING;
-            this.fetchAllPokemon(); 
+            if (this.state.filter.type == "all" && this.state.filter.game == "all") return this.updateDisplayPokemons();
+            this.updateDisplayPokemonsFiltered();
+        },
+
+        async updateDisplayPokemonsFiltered()
+        {
+            if (this.controller) {
+                this.controller.abort();
+            }
+            this.controller = new AbortController();
+            const signal = this.controller.signal;
+
+            const displayPokemonLength = this.displayPokemons.length;
+            let pokemons = [];
+
+            while (pokemons.length < 20) 
+            {
+                if (this.filterStart < this.fetchedPokemons.length)
+                {
+                    const start = this.filterStart;
+                    for (let pokemon of this.fetchedPokemons.slice(start, this.fetchedPokemons.length))
+                    {
+                        if (pokemons.length >= 20) break;
+                        let valid = true;
+                        if (this.state.filter.type != 'all')
+                        {
+                            let typeValid = false;
+
+                            for (let type in pokemon.types)
+                            {
+                                if (pokemon.types[type].type.name == this.state.filter.type)
+                                {
+                                    typeValid = true;
+                                    break;
+                                }
+                            }
+                            if (!typeValid) valid = false;
+                        }
+
+                        if (this.state.filter.game != 'all')
+                        {
+                            let gameValid = false;
+
+                            for (let game in pokemon.game_indices)
+                            {
+                                if (pokemon.game_indices[game].version.name == this.state.filter.game)
+                                {
+                                    gameValid = true;
+                                    break;
+                                }
+                            }
+                            if (!gameValid) valid = false;
+                        }
+
+                        if (valid)
+                        {
+                            pokemons.push(pokemon);
+                        }         
+                        this.filterStart += 1; 
+                    }
+                }
+                else if (this.state.url)
+                {
+                    const result = await fetchPokemon(this.state.url, signal);
+                    const pokemonsRes = await Promise.all(result.results.map(async (element) => {
+                        const pokemon = await fetch(element.url);
+                        const result = await pokemon.json();
+                        return result;
+                    }));
+                    this.fetchedPokemons.push(...pokemonsRes);
+                
+                    this.state.url = result.next;
+                } else {
+                    break;
+                }
+            }
+            this.displayPokemons.push(...pokemons);
+            this.loadImage(displayPokemonLength);
+            this.state.pageState = pageState.LOADED;
+        },
+
+        async search() {
+            this.state.pageState = pageState.LOADING;
+            this.displayPokemons.splice(0, this.displayPokemons.length);
+            if (this.searchValue.length < 1)
+            {
+                if (this.state.display == 'filter')
+                {
+                    this.filterStart = 0;
+                    this.updateDisplayPokemonsFiltered()
+                } else {
+                    this.updateDisplayPokemons();
+                }
+                return;
+            }
+            if (this.controller) {
+                this.controller.abort();
+            }
+
+            this.controller = new AbortController();
+            const signal = this.controller.signal;
+
+            let pokemons = [];
+            let searched = 0;
+
+            const reg = new RegExp(`.*${this.searchValue}.*`, 'i');
+  
+            while (pokemons.length < 20)
+            {   
+                if (this.fetchedPokemons.length > searched)  {
+                    const pokeTemp = this.fetchedPokemons.slice(searched, this.fetchedPokemons.length);
+                    for (let pokemon of pokeTemp) 
+                    {
+                        if (reg.test(pokemon.name)) {
+                            pokemons.push(pokemon);
+                        }
+                        searched += 1;
+                    }
+                } else if (this.state.url) {
+                    const result = await fetchPokemon(this.state.url, signal);
+                    if (result) {
+                        const pokemonsRes = await Promise.all(result.results.map(async (element) => {
+                            const pokemon = await fetch(element.url, signal);
+                                const result = await pokemon.json();
+                                return result;
+                            }));
+                        this.fetchedPokemons.push(...pokemonsRes);
+                        this.state.url = result.next;
+                    } else {
+                        return;
+                    }
+                } else {
+                    break;
+                }
+            } 
+
+            this.displayPokemons.push(...pokemons);
+            this.loadImage(0);
+            this.state.pageState = pageState.LOADEDSEARCH;
         }
     },
      
     mounted()
     {
         document.addEventListener("scroll", this.handleElementScroll);
-        setTimeout(() => {
-            this.fetchAllPokemon();
-        }, 500);
+        this.updateDisplayPokemons();
+
     }
 });
 

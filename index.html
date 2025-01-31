@@ -16,7 +16,7 @@
     <main id="index">
         <div class="filter">
             <div class="search-container">
-                <input type="text" class="search" name="" @input="search()" id="search-input" id="" placeholder="Search Pokemon Name" spellcheck="false">
+                <input type="text" class="search" name="" @input="search()" v-model="searchValue" id="search-input" placeholder="Search Pokemon Name" spellcheck="false">
                 <img src="./assets/search.png" alt="search" class="search-icon">
             </div>
 
@@ -74,14 +74,15 @@
         <div v-if="state.pageState == 'loading'" class="loading">
             <img src="./assets/loading.gif" alt="loading">
         </div>
-        <div v-else-if="(state.pageState == 'loadedsearch' || state.pageState == 'loaded') && pokemons.length < 1" class="loading">
+        <div v-else-if="(state.pageState == 'loadedsearch' || state.pageState == 'loaded') && displayPokemons.length < 1" class="loading">
             <img src="./assets/empty.gif" alt="loading">
         </div>
         <div v-else>
             <div ref="pokemonContainer"  class="pokemon-container">
-                <a v-for="pokemon in pokemons" class="card" :href="'pages/pokemonDetail.html?id=' + pokemon.id">
+                <a v-for="pokemon in displayPokemons" class="card" :href="'pages/pokemonDetail.html?id=' + pokemon.id">
+                    <strong class="id">{{ pokemon.id }}</strong>
                     <div class="image" :id="'pokemon' + pokemon.id">
-                        <img  src="./assets/loading.gif" :alt="pokemons.name" class="pokemon-loading">
+                        <img  src="./assets/loading.gif" :alt="displayPokemons.name" class="pokemon-loading">
                     </div>
                     <strong class="pokemon-name">{{ pokemon.name.toUpperCase() }}</strong>
                     <div class="types">

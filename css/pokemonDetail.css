@@ -5,10 +5,6 @@ body {
     overflow-y: scroll;
 }
 
-main {
-    max-width: 600px;
-    overflow-x: hidden;
-}
 
 .pokeball-icon {
     width: 2rem;
@@ -46,83 +42,122 @@ main {
     margin-bottom: 20px;
 }
 
-
 .prev:hover, .next:hover, .home:hover {
     cursor: pointer;
 }
 
-.pokemon-img {
+.main-info {
     display: grid;
-}
-
-.sprite-container {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 49% 49%;
-    gap: 1.5%;
-}
-
-.sprite-container > img {
-    width: 100%;
-}
-
-.stat-container {
     margin-top: 20px;
-    margin-bottom: 20px;
-    display: grid;
-    grid-template-columns: 50% 50%;
-
-}
-
-.stat-container > div {
-    display: grid;
-    grid-template-columns: 50% 70%;
-    gap: 10px;
-    color: rgb(52, 51, 51);
-    height: fit-content;
     align-items: center;
 }
 
-.table-move {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-td {
-    text-align: center;
-    border: 1px solid rgb(51, 50, 50);
-}
-
-th {
-    background-color: rgba(225, 25, 25, 0.905);
-    color: white;
-    padding: 5px;
-}
-
-.pokemon-section-4 {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    margin-top: 20px;
-    margin-bottom: 20px;
-}
-
-.item-img {
+#main-image-container  {
     width: 100%;
     aspect-ratio: 1/1;
+    background: rgba(162, 137, 221, 0.164);
+    border-radius: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.held-item {
-    width: 100px;
+#main-image-container > img {
+    width: 100%;
+    max-width: 300px;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+}
+
+.main-info > ul > li {
+    list-style: none;
+    overflow: hidden;
+}
+
+.main-info > ul {
+    list-style: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+}
+
+
+.stat-bars {
+    width: 100%;
+    height: 10px;
+    border-radius: 8px;
+    overflow: visible;
+    background: rgba(194, 181, 181, 0.42);
+    position: relative;
+    color: rgb(112, 107, 107);
+}
+
+.number-stat {
+    position: absolute;
+    display: block;
+    right: 5px;
+    font-size: 16px;
+    top: -10px;
+    font-weight: 600;
+    color: rgba(43, 41, 41, 0.753);
+    transform: rotate(-35deg);
+}
+
+.fill-bar {
+    height: 100%;
+    border-radius: 8px;
+}
+
+#moves {
+    overflow-x: scroll;
+    overflow-y: hidden;
+}
+
+table {
+    min-width: 500px;
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+th {
+    background: rgb(101, 101, 218);
+    padding: 5px;
+    color: white;
+    text-align: start;
+    border: 1px solid black;
+
+
+}
+
+.acc, .power, .pp {
     text-align: center;
 }
 
-.item-img {
-    background-color: rgba(92, 92, 92, 0.28);
-    border-radius: 8px;
+td {
+    color: rgb(84, 81, 81);
+    font-weight: 600;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    border: 1px solid rgba(6, 26, 69, 0.558);
+}
+
+#pokemon-name {
+    font-weight: 600;
+    color: rgba(65, 58, 58, 0.912);
+}
+
+.items-empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgb(70, 64, 64);
 }
 
 @media only screen and (max-width: 800px)
@@ -135,4 +170,71 @@ th {
         row-gap: 20px;
     }
 
+}
+
+
+
+@media only screen and (min-width: 600px)
+{
+    .main-info {
+        grid-template-columns: 47% 47%;
+        column-gap: 6%;
+    }
+
+    .main-info > ul > li {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-bars {
+        margin-top: 5px;
+    }
+
+    #pokemon-name {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        gap: 10px;
+    }    
+}
+
+@media only screen and (max-width: 600px)
+{
+    .main-info {
+        grid-template-columns: 100%;
+        row-gap: 10px;
+    }
+    .main-info > ul {
+        list-style: none;
+        overflow: hidden;
+        display: block;
+        gap: 5px;
+        padding: 0;
+    }
+    
+    .main-info > ul > li {
+        margin-top: 5px;
+    }
+    
+    .stat-bars {
+        margin-top: 5px;
+    }
+
+    #pokemon-name {
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        gap: 5px;
+    }    
+}
+
+.effect {
+    font-weight: 200;
+    text-align: center;
+}
+
+#moves, #held-items {
+    overflow-x: auto;
+    overflow-y: hidden;
 }

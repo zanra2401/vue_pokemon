@@ -145,7 +145,7 @@
                 </div>
                 <div v-else>
                     <div ref="pokemonContainer"  class="pokemon-container">
-                        <a v-for="pokemon in evolution" class="card" :href="'/pages/pokemonDetail.html?id=' + pokemon.id">
+                        <a v-for="pokemon in evolution" class="card" :href="'/vue_pokemon/pages/pokemonDetail.html?id=' + pokemon.id">
                             <strong class="id">{{ pokemon.id }}</strong>
                             <div class="image" :id="'pokemon' + pokemon.id">
                                 <img  src="../assets/loading.gif" :alt="pokemon.name" class="pokemon-loading">

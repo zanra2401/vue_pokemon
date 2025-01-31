@@ -75,7 +75,7 @@
         <div v-if="state.pageState == 'loading'" class="loading">
             <img src="./assets/loading.gif" alt="loading">
         </div>
-        <div v-else-if="(state.pageState == 'loadedsearch' || state.pageState == 'loaded') && displayPokemons.length < 1" class="loading">
+        <div v-else-if="(state.pageState == 'loadedsearch' || state.pageState == 'loaded') && displayPokemons.length < 1" class="loading empty">
             <img src="./assets/empty.gif" alt="loading">
         </div>
         <div v-else>

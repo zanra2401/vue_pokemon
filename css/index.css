@@ -83,3 +83,7 @@ body {
     column-gap: 5px;
 }
 
+.empty {
+    width: 500px;
+}
+
